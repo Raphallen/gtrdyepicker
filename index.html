@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Picker</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap">
+    <style>
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to bottom, #D98AA7, #F9B2B7);
+        }
+        #footer {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #000000;
+        }
+        #footer p {
+            margin: 5px 0;
+        }
+        #colorPickerContainer {
+            text-align: center;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border: 10px solid #F9B2B7;
+            box-sizing: border-box;
+        }
+        #colorCanvas {
+            cursor: crosshair;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 80px;
+            margin-left: 5px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="colorPickerContainer">
+        <label for="imageInput">Choose an image:</label><br>
+        <input type="file" id="imageInput" accept="image/*"><br>
+        <canvas id="colorCanvas"></canvas><br>
+        <label for="colorResult">Color:</label>
+        <input type="text" id="colorResult" readonly>
+        <label for="intensityResult">Intensity:</label>
+        <input type="text" id="intensityResult" readonly>
+        <label for="brightnessResult">Brightness:</label>
+        <input type="text" id="brightnessResult" readonly>
+        <br>
+        <br>
+        <br>
+        <p>Coded by Afallen</p>
+    </div>
+    
+    <script>
+        document.getElementById('imageInput').addEventListener('change', handleImage);
+
+        function handleImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                loadImage(file);
+            }
+        }
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    setupCanvas(img);
+                };
+                img.src = e.target.result;
+            };
+            reader.onerror = function () {
+                console.error('Error loading image.');
+            };
+            reader.readAsDataURL(file);
+        }
+
+function setupCanvas(img) {
+    const canvas = document.getElementById('colorCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const maxWidth = window.innerWidth * 0.9;
+    const scaleFactor = maxWidth / img.width;
+    const scaledWidth = img.width * scaleFactor;
+    const scaledHeight = img.height * scaleFactor;
+    canvas.width = scaledWidth;
+    canvas.height = scaledHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+    canvas.addEventListener('click', handleCanvasClick);
+}
+
+function handleCanvasClick(event) {
+    const canvas = document.getElementById('colorCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const imageData = ctx.getImageData(x, y, 1, 1).data;
+    const r = imageData[0] / 255;
+    const g = imageData[1] / 255;
+    const b = imageData[2] / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+
+    let hue = 0;
+    let saturation = 0;
+    let value = max;
+
+    if (delta !== 0) {
+        saturation = delta / max;
+
+        if (max === r) {
+            hue = ((g - b) / delta) % 6;
+        } else if (max === g) {
+            hue = ((b - r) / delta) + 2;
+        } else {
+            hue = ((r - g) / delta) + 4;
+        }
+
+        hue = Math.round(hue * 60);
+        if (hue < 0) {
+            hue += 360;
+        }
+    }
+
+    let color = Math.round(hue / 360 * 512);
+    let intensity = Math.round(saturation * 512);
+    let brightness = Math.round(value * 512);
+
+    if (color > 512) {
+        color = Math.min(color, 999);
+    }
+    if (intensity > 512) {
+        intensity = Math.min(intensity, 999);
+    }
+    if (brightness > 512) {
+        brightness = Math.min(brightness, 999);
+    }
+
+    updateColorValues(color, intensity, brightness);
+}
+
+        function updateColorValues(color, intensity, brightness) {
+            document.getElementById('colorResult').value = color;
+            document.getElementById('intensityResult').value = intensity;
+            document.getElementById('brightnessResult').value = brightness;
+        }
+    </script>
+</body>
+</html>
