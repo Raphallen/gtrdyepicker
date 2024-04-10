@@ -34,8 +34,8 @@ function setupCanvas(img) {
     const canvas = document.getElementById('colorCanvas');
     const ctx = canvas.getContext('2d');
 
-    const maxWidth = window.innerWidth * 0.9;
-    const maxHeight = window.innerHeight * 0.9;
+    const maxWidth = window.innerWidth * 0.6;
+    const maxHeight = window.innerHeight * 0.6;
 
     let scaleFactor = 1;
     if (img.width > maxWidth || img.height > maxHeight) {
