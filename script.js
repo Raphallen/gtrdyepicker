@@ -1,4 +1,3 @@
-    <script>
         const magnifier = document.getElementById('magnifier');
         const magnifierCanvas = document.createElement('canvas');
         const magnifierCtx = magnifierCanvas.getContext('2d');
@@ -207,6 +206,3 @@
             document.getElementById('intensityResult').value = Math.round(color[1] * 512 / 100);
             document.getElementById('brightnessResult').value = Math.round(color[2] * 512 / 100);
         }
-    </script>
-</body>
-</html>
