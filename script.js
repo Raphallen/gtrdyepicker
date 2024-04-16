@@ -122,12 +122,12 @@ function handleCanvasClick(event) {
 }
 
 function updateColorValues(r, g, b) {
-    document.getElementById('colorResult').value = `rgb(${r}, ${g}, ${b})`;
-    document.getElementById('intensityResult').value = Math.round((r + g + b) / 3 * 512 / 255);
-    document.getElementById('brightnessResult').value = Math.round(Math.max(r, g, b) * 512 / 255);
+    const [h, s, l] = rgbToHsl(r, g, b);
 
-    const [hue, saturation, lightness] = rgbToHsl(r, g, b);
-    document.getElementById('colorResult').value = `${hue}, ${saturation}, ${lightness}`;
+    // Update HSL values in the corresponding textboxes
+    document.getElementById('colorResult').value = Math.round(h * 512 / 360);
+    document.getElementById('intensityResult').value = Math.round(s * 512 / 100);
+    document.getElementById('brightnessResult').value = Math.round(l * 512 / 100);
 }
 
 function rgbToHsl(r, g, b) {
@@ -148,7 +148,7 @@ function rgbToHsl(r, g, b) {
         h /= 6;
     }
 
-    return [Math.round(h * 512), Math.round(s * 512), Math.round(l * 512)];
+    return [h * 360, s * 100, l * 100];
 }
 
 function addToPalette(color) {
