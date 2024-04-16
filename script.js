@@ -113,43 +113,10 @@ function handleCanvasClick(event) {
     const y = event.clientY - rect.top;
 
     const imageData = ctx.getImageData(x, y, 1, 1).data;
+    const r = imageData[0] / 255;
+    const g = imageData[1] / 255;
+    const b = imageData[2] / 255;
 
-    const [r, g, b] = imageData;
-
-    // Convert RGB to HSL
-    const hsl = rgbToHsl(r, g, b);
-
-    // Update Color, Intensity, and Brightness fields with HSL values
-    updateColorValues(hsl[0] * 360, hsl[1] * 100, hsl[2] * 100);
-
-    addToPalette(imageData);
-}
-
-function updateColorValues(hue, saturation, lightness) {
-    const hueScaled = Math.round(hue / 360 * 512) || 1;
-    const saturationScaled = Math.round(saturation / 100 * 512) || 1;
-    const lightnessScaled = Math.round(lightness / 100 * 512) || 1;
-
-    document.getElementById('colorResult').value = hueScaled;
-    document.getElementById('intensityResult').value = saturationScaled;
-    document.getElementById('brightnessResult').value = lightnessScaled;
-}
-
-function addToPalette(imageData) {
-    const [r, g, b] = imageData;
-
-    const colorBox = document.createElement('div');
-    colorBox.classList.add('colorBox');
-    colorBox.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-    colorBox.title = `R: ${r}, G: ${g}, B: ${b}`;
-    colorBox.addEventListener('click', () => selectColor(imageData));
-
-    const colorPalette = document.getElementById('colorPalette');
-    colorPalette.appendChild(colorBox);
-}
-
-function selectColor(imageData) {
-    const [r, g, b] = imageData;
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
     const delta = max - min;
@@ -175,39 +142,43 @@ function selectColor(imageData) {
         }
     }
 
-    updateColorValues(hue, saturation * 100, value * 100);
-}
+    let color = Math.round(hue / 360 * 512);
+    let intensity = Math.round(saturation * 512);
+    let brightness = Math.round(value * 512);
 
-function rgbToHsl(r, g, b) {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-        h = s = 0; // achromatic
-    } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
+    if (color > 512) {
+        color = Math.min(color, 999);
+    }
+    if (intensity > 512) {
+        intensity = Math.min(intensity, 999);
+    }
+    if (brightness > 512) {
+        brightness = Math.min(brightness, 999);
     }
 
-    return [h, s, l];
+    updateColorValues(color, intensity, brightness);
+    addToPalette([hue, saturation * 100, value * 100]); // Adjusted here
 }
 
-// Limit textboxes to 3 characters
-const textboxes = document.querySelectorAll('input[type="text"]');
-textboxes.forEach(textbox => {
-    textbox.addEventListener('input', function () {
-        if (this.value.length > 3) {
-            this.value = this.value.slice(0, 3);
-        }
-    });
-});
+function updateColorValues(color, intensity, brightness) {
+    document.getElementById('colorResult').value = color;
+    document.getElementById('intensityResult').value = intensity;
+    document.getElementById('brightnessResult').value = brightness;
+}
+
+function addToPalette(color) {
+    const colorBox = document.createElement('div');
+    colorBox.classList.add('colorBox');
+    colorBox.style.backgroundColor = `hsl(${color[0]}, ${color[1]}%, ${color[2]}%)`;
+    colorBox.title = `H: ${Math.round(color[0])}, S: ${Math.round(color[1])}%, L: ${Math.round(color[2])}%`;
+    colorBox.addEventListener('click', () => selectColor(color));
+
+    const colorPalette = document.getElementById('colorPalette'); // Get the color palette element
+    colorPalette.appendChild(colorBox); // Append the color box to the palette
+}
+
+function selectColor(color) {
+    document.getElementById('colorResult').value = Math.round(color[0] * 512 / 360);
+    document.getElementById('intensityResult').value = Math.round(color[1] * 512 / 100);
+    document.getElementById('brightnessResult').value = Math.round(color[2] * 512 / 100);
+}
