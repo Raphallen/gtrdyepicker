@@ -195,7 +195,8 @@ function addToPalette(color) {
     colorBox.title = `H: ${Math.round(color[0])}, S: ${Math.round(color[1])}%, L: ${Math.round(color[2])}%`;
     colorBox.addEventListener('click', () => selectColor(color));
 
-    colorPalette.appendChild(colorBox);
+    const colorPalette = document.getElementById('colorPalette'); // Get the color palette element
+    colorPalette.appendChild(colorBox); // Append the color box to the palette
 }
 
 function selectColor(color) {
