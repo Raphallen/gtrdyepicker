@@ -115,53 +115,24 @@ function handleCanvasClick(event) {
     const imageData = ctx.getImageData(x, y, 1, 1).data;
 
     const [r, g, b] = imageData;
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const delta = max - min;
 
-    let hue = 0;
-    let saturation = 0;
-    let value = max;
+    // Convert RGB to HSL
+    const hsl = rgbToHsl(r, g, b);
 
-    if (delta !== 0) {
-        saturation = delta / max;
+    // Update Color, Intensity, and Brightness fields with HSL values
+    updateColorValues(hsl[0], hsl[1] * 100, hsl[2] * 100);
 
-        if (max === r) {
-            hue = ((g - b) / delta) % 6;
-        } else if (max === g) {
-            hue = ((b - r) / delta) + 2;
-        } else {
-            hue = ((r - g) / delta) + 4;
-        }
-
-        hue = Math.round(hue * 60);
-        if (hue < 0) {
-            hue += 360;
-        }
-    }
-
-    let color = Math.round(hue / 360 * 512);
-    let intensity = Math.round(saturation * 512);
-    let brightness = Math.round(value * 512);
-
-    if (color > 512) {
-        color = Math.min(color, 999);
-    }
-    if (intensity > 512) {
-        intensity = Math.min(intensity, 999);
-    }
-    if (brightness > 512) {
-        brightness = Math.min(brightness, 999);
-    }
-
-    updateColorValues(color, intensity, brightness);
     addToPalette(imageData);
 }
 
-function updateColorValues(color, intensity, brightness) {
-    document.getElementById('colorResult').value = color;
-    document.getElementById('intensityResult').value = intensity;
-    document.getElementById('brightnessResult').value = brightness;
+function updateColorValues(hue, saturation, lightness) {
+    const hueScaled = Math.round(hue / 360 * 512) || 1;
+    const saturationScaled = Math.round(saturation / 100 * 512) || 1;
+    const lightnessScaled = Math.round(lightness / 100 * 512) || 1;
+
+    document.getElementById('colorResult').value = hueScaled;
+    document.getElementById('intensityResult').value = saturationScaled;
+    document.getElementById('brightnessResult').value = lightnessScaled;
 }
 
 function addToPalette(imageData) {
@@ -205,4 +176,28 @@ function selectColor(imageData) {
     }
 
     updateColorValues(hue, saturation * 100, value * 100);
+}
+
+function rgbToHsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0; // achromatic
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+
+    return [h, s, l];
 }
