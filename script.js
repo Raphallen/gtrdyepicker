@@ -23,9 +23,6 @@ function loadImage(file) {
         };
         img.src = e.target.result;
     };
-    reader.onerror = function () {
-        console.error('Error loading image.');
-    };
     reader.readAsDataURL(file);
 }
 
@@ -90,10 +87,9 @@ function showMagnifier(mouseX, mouseY, imageData) {
     magnifier.style.display = 'block';
 
     const [r, g, b] = imageData;
-    const [hue, saturation, lightness] = rgbToHsl(r, g, b);
 
     magnifierCtx.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
-    magnifierCtx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    magnifierCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
     magnifierCtx.fillRect(0, 0, magnifierSize, magnifierSize);
 
     magnifierCtx.strokeStyle = 'black';
@@ -117,10 +113,8 @@ function handleCanvasClick(event) {
     const y = event.clientY - rect.top;
 
     const imageData = ctx.getImageData(x, y, 1, 1).data;
-    const r = imageData[0] / 255;
-    const g = imageData[1] / 255;
-    const b = imageData[2] / 255;
 
+    const [r, g, b] = imageData;
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
     const delta = max - min;
@@ -161,7 +155,7 @@ function handleCanvasClick(event) {
     }
 
     updateColorValues(color, intensity, brightness);
-    addToPalette([hue, saturation * 100, value * 100]);
+    addToPalette(imageData);
 }
 
 function updateColorValues(color, intensity, brightness) {
@@ -170,67 +164,45 @@ function updateColorValues(color, intensity, brightness) {
     document.getElementById('brightnessResult').value = brightness;
 }
 
-function rgbToHsl(r, g, b) {
-    r /= 255, g /= 255, b /= 255;
-    const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max == min) {
-        h = s = 0; // achromatic
-    } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-
-    return [h * 360, s * 100, l * 100];
-}
-
-function hslToRgb(h, s, l) {
-    let r, g, b;
-
-    if (s === 0) {
-        r = g = b = l; // achromatic
-    } else {
-        const hue2rgb = (p, q, t) => {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-        };
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
-    }
-
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-}
-
-function addToPalette(color) {
-    const [hue, saturation, lightness] = color;
-    const [r, g, b] = hslToRgb(hue / 360, saturation / 100, lightness / 100);
+function addToPalette(imageData) {
+    const [r, g, b] = imageData;
 
     const colorBox = document.createElement('div');
     colorBox.classList.add('colorBox');
     colorBox.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
     colorBox.title = `R: ${r}, G: ${g}, B: ${b}`;
-    colorBox.addEventListener('click', () => selectColor(color));
+    colorBox.addEventListener('click', () => selectColor(imageData));
 
     const colorPalette = document.getElementById('colorPalette');
     colorPalette.appendChild(colorBox);
 }
 
-function selectColor(color) {
-    document.getElementById('colorResult').value = Math.round(color[0] * 512 / 360);
-    document.getElementById('intensityResult').value = Math.round(color[1] * 512 / 100);
-    document.getElementById('brightnessResult').value = Math.round(color[2] * 512 / 100);
+function selectColor(imageData) {
+    const [r, g, b] = imageData;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+
+    let hue = 0;
+    let saturation = 0;
+    let value = max;
+
+    if (delta !== 0) {
+        saturation = delta / max;
+
+        if (max === r) {
+            hue = ((g - b) / delta) % 6;
+        } else if (max === g) {
+            hue = ((b - r) / delta) + 2;
+        } else {
+            hue = ((r - g) / delta) + 4;
+        }
+
+        hue = Math.round(hue * 60);
+        if (hue < 0) {
+            hue += 360;
+        }
+    }
+
+    updateColorValues(hue, saturation * 100, value * 100);
 }
