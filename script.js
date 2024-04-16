@@ -23,6 +23,9 @@ function loadImage(file) {
         };
         img.src = e.target.result;
     };
+    reader.onerror = function () {
+        console.error('Error loading image.');
+    };
     reader.readAsDataURL(file);
 }
 
@@ -73,7 +76,7 @@ function handleCanvasMouseMove(event) {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    const imageData = ctx.getImageData(x, y, 1, 1).data;
+    const imageData = ctx.getImageData(x, y, 1, 1).data; // Change here
     showMagnifier(event.clientX, event.clientY, imageData);
 }
 
@@ -86,10 +89,8 @@ function showMagnifier(mouseX, mouseY, imageData) {
     magnifier.style.top = (mouseY + 20) + 'px';
     magnifier.style.display = 'block';
 
-    const [r, g, b] = imageData;
-
     magnifierCtx.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
-    magnifierCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    magnifierCtx.fillStyle = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
     magnifierCtx.fillRect(0, 0, magnifierSize, magnifierSize);
 
     magnifierCtx.strokeStyle = 'black';
@@ -156,8 +157,7 @@ function handleCanvasClick(event) {
         brightness = Math.min(brightness, 999);
     }
 
-    updateColorValues(hue, saturation * 100, value * 100);
-    addToPalette([r, g, b]);
+    updateColorValues(color, intensity, brightness);
 }
 
 function updateColorValues(color, intensity, brightness) {
@@ -166,20 +166,23 @@ function updateColorValues(color, intensity, brightness) {
     document.getElementById('brightnessResult').value = brightness;
 }
 
-function addToPalette(color) {
-    const [r, g, b] = color;
+function rgbToHsl(r, g, b) {
+    r /= 255, g /= 255, b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
 
-    const colorBox = document.createElement('div');
-    colorBox.classList.add('colorBox');
-    colorBox.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-    colorBox.title = `R: ${r}, G: ${g}, B: ${b}`;
-    colorBox.addEventListener('click', () => selectColor(color));
+    if (max == min) {
+        h = s = 0; // achromatic
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
 
-    const colorPalette = document.getElementById('colorPalette');
-    colorPalette.appendChild(colorBox);
-}
-
-function selectColor(color) {
-    const [r, g, b] = color;
-    updateColorValues(r, g, b);
+    return [h * 360, s * 100, l * 100];
 }
