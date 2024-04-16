@@ -222,7 +222,7 @@ function addToPalette(color) {
     const colorBox = document.createElement('div');
     colorBox.classList.add('colorBox');
     colorBox.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-    colorBox.title = `H: ${Math.round(hue)}, S: ${Math.round(saturation)}%, L: ${Math.round(lightness)}%`;
+    colorBox.title = `R: ${r}, G: ${g}, B: ${b}`;
     colorBox.addEventListener('click', () => selectColor(color));
 
     const colorPalette = document.getElementById('colorPalette');
