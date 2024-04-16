@@ -159,6 +159,7 @@ function handleCanvasClick(event) {
     }
 
     updateColorValues(color, intensity, brightness);
+    addToPalette([hue, saturation * 100, value * 100]); // Adjusted here
 }
 
 function updateColorValues(color, intensity, brightness) {
