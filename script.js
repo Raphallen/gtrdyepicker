@@ -77,7 +77,7 @@ function handleCanvasMouseMove(event) {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    const imageData = ctx.getImageData(x, y, 1, 1).data;
+    const imageData = ctx.getImageData(x, y, 1, 1).data; // Change here
     showMagnifier(event.clientX, event.clientY, imageData);
 }
 
