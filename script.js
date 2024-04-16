@@ -113,57 +113,21 @@ function handleCanvasClick(event) {
     const y = event.clientY - rect.top;
 
     const imageData = ctx.getImageData(x, y, 1, 1).data;
-    const r = imageData[0] / 255;
-    const g = imageData[1] / 255;
-    const b = imageData[2] / 255;
+    const r = imageData[0];
+    const g = imageData[1];
+    const b = imageData[2];
 
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const delta = max - min;
-
-    let hue = 0;
-    let saturation = 0;
-    let value = max;
-
-    if (delta !== 0) {
-        saturation = delta / max;
-
-        if (max === r) {
-            hue = ((g - b) / delta) % 6;
-        } else if (max === g) {
-            hue = ((b - r) / delta) + 2;
-        } else {
-            hue = ((r - g) / delta) + 4;
-        }
-
-        hue = Math.round(hue * 60);
-        if (hue < 0) {
-            hue += 360;
-        }
-    }
-
-    let color = Math.round(hue / 360 * 512);
-    let intensity = Math.round(saturation * 512);
-    let brightness = Math.round(value * 512);
-
-    if (color > 512) {
-        color = Math.min(color, 999);
-    }
-    if (intensity > 512) {
-        intensity = Math.min(intensity, 999);
-    }
-    if (brightness > 512) {
-        brightness = Math.min(brightness, 999);
-    }
-
-    updateColorValues(color, intensity, brightness);
-    addToPalette([hue, saturation * 100, value * 100]); // Adjusted here
+    updateColorValues(r, g, b);
+    addToPalette([r, g, b]);
 }
 
-function updateColorValues(color, intensity, brightness) {
-    document.getElementById('colorResult').value = color;
-    document.getElementById('intensityResult').value = intensity;
-    document.getElementById('brightnessResult').value = brightness;
+function updateColorValues(r, g, b) {
+    document.getElementById('colorResult').value = `rgb(${r}, ${g}, ${b})`;
+    document.getElementById('intensityResult').value = Math.round((r + g + b) / 3 * 512 / 255);
+    document.getElementById('brightnessResult').value = Math.round(Math.max(r, g, b) * 512 / 255);
+
+    const [hue, saturation, lightness] = rgbToHsl(r, g, b);
+    document.getElementById('colorResult').value = `${hue}, ${saturation}, ${lightness}`;
 }
 
 function rgbToHsl(r, g, b) {
@@ -184,7 +148,7 @@ function rgbToHsl(r, g, b) {
         h /= 6;
     }
 
-    return [h * 360, s * 100, l * 100];
+    return [Math.round(h * 512), Math.round(s * 512), Math.round(l * 512)];
 }
 
 function addToPalette(color) {
@@ -194,7 +158,7 @@ function addToPalette(color) {
     colorBox.classList.add('colorBox');
     colorBox.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
     colorBox.title = `R: ${r}, G: ${g}, B: ${b}`;
-    colorBox.addEventListener('click', () => selectColor([r, g, b]));
+    colorBox.addEventListener('click', () => selectColor(color));
 
     const colorPalette = document.getElementById('colorPalette');
     colorPalette.appendChild(colorBox);
@@ -202,7 +166,5 @@ function addToPalette(color) {
 
 function selectColor(color) {
     const [r, g, b] = color;
-    document.getElementById('colorResult').value = Math.round(r * 512 / 255);
-    document.getElementById('intensityResult').value = Math.round(g * 512 / 255);
-    document.getElementById('brightnessResult').value = Math.round(b * 512 / 255);
+    updateColorValues(r, g, b);
 }
