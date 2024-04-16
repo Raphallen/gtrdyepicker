@@ -106,6 +106,67 @@ function hideMagnifier() {
     magnifierVisible = false;
 }
 
+function handleCanvasClick(event) {
+    const canvas = document.getElementById('colorCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const imageData = ctx.getImageData(x, y, 1, 1).data;
+    const r = imageData[0] / 255;
+    const g = imageData[1] / 255;
+    const b = imageData[2] / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+
+    let hue = 0;
+    let saturation = 0;
+    let value = max;
+
+    if (delta !== 0) {
+        saturation = delta / max;
+
+        if (max === r) {
+            hue = ((g - b) / delta) % 6;
+        } else if (max === g) {
+            hue = ((b - r) / delta) + 2;
+        } else {
+            hue = ((r - g) / delta) + 4;
+        }
+
+        hue = Math.round(hue * 60);
+        if (hue < 0) {
+            hue += 360;
+        }
+    }
+
+    let color = Math.round(hue / 360 * 512);
+    let intensity = Math.round(saturation * 512);
+    let brightness = Math.round(value * 512);
+
+    if (color > 512) {
+        color = Math.min(color, 999);
+    }
+    if (intensity > 512) {
+        intensity = Math.min(intensity, 999);
+    }
+    if (brightness > 512) {
+        brightness = Math.min(brightness, 999);
+    }
+
+    updateColorValues(color, intensity, brightness);
+}
+
+function updateColorValues(color, intensity, brightness) {
+    document.getElementById('colorResult').value = color;
+    document.getElementById('intensityResult').value = intensity;
+    document.getElementById('brightnessResult').value = brightness;
+}
+
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -125,24 +186,6 @@ function rgbToHsl(r, g, b) {
     }
 
     return [h * 360, s * 100, l * 100];
-}
-
-function updateColorValues(hsl) {
-    document.getElementById('colorResult').value = Math.round(hsl[0] * 512 / 360);
-    document.getElementById('intensityResult').value = Math.round(hsl[1] * 512 / 100);
-    document.getElementById('brightnessResult').value = Math.round(hsl[2] * 512 / 100);
-}
-
-function handleCanvasClick(event) {
-    const canvas = document.getElementById('colorCanvas');
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    const imageData = ctx.getImageData(x, y, 1, 1).data;
-    const color = rgbToHsl(imageData[0], imageData[1], imageData[2]);
-    addToPalette(color);
 }
 
 function addToPalette(color) {
