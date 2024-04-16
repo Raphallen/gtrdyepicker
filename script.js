@@ -126,11 +126,11 @@ function handleCanvasClick(event) {
 }
 
 function updateColorValues(hue, saturation, lightness) {
-    const hueScaled = Math.round(hue / 360 * 512) || 1;
+    const colorScaled = Math.round(hue / 360 * 512) || 1;
     const saturationScaled = Math.round(saturation / 100 * 512) || 1;
     const lightnessScaled = Math.round(lightness / 100 * 512) || 1;
 
-    document.getElementById('colorResult').value = hueScaled;
+    document.getElementById('colorResult').value = colorScaled;
     document.getElementById('intensityResult').value = saturationScaled;
     document.getElementById('brightnessResult').value = lightnessScaled;
 }
@@ -201,3 +201,13 @@ function rgbToHsl(r, g, b) {
 
     return [h, s, l];
 }
+
+// Limit textboxes to 3 characters
+const textboxes = document.querySelectorAll('input[type="text"]');
+textboxes.forEach(textbox => {
+    textbox.addEventListener('input', function () {
+        if (this.value.length > 3) {
+            this.value = this.value.slice(0, 3);
+        }
+    });
+});
