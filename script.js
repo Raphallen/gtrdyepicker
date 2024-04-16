@@ -120,17 +120,17 @@ function handleCanvasClick(event) {
     const hsl = rgbToHsl(r, g, b);
 
     // Update Color, Intensity, and Brightness fields with HSL values
-    updateColorValues(hsl[0], hsl[1] * 100, hsl[2] * 100);
+    updateColorValues(hsl[0] * 360, hsl[1] * 100, hsl[2] * 100);
 
     addToPalette(imageData);
 }
 
 function updateColorValues(hue, saturation, lightness) {
-    const colorScaled = Math.round(hue / 360 * 512) || 1;
+    const hueScaled = Math.round(hue / 360 * 512) || 1;
     const saturationScaled = Math.round(saturation / 100 * 512) || 1;
     const lightnessScaled = Math.round(lightness / 100 * 512) || 1;
 
-    document.getElementById('colorResult').value = colorScaled;
+    document.getElementById('colorResult').value = hueScaled;
     document.getElementById('intensityResult').value = saturationScaled;
     document.getElementById('brightnessResult').value = lightnessScaled;
 }
