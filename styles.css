@@ -101,4 +101,25 @@ input[type="text"] {
     border-radius: 4px;
     background-color: #f9f9f9;
     font-size: 14px;
+
+  .kofi-float {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+  }
+
+  .kofi-float img {
+    width: 60px; /* size of the button */
+    height: auto;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .kofi-float img:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  }
 }
+
