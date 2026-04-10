@@ -2,9 +2,11 @@
 
 A browser-based tool for Tales Runner players to extract dye values directly from images. No installation required — open and use.
 
-Discord: afallen
-Access the tool here: [Tales Runner Fashion Assist](https://raphallen.github.io/gtrdyepicker/)
-[Buy me a coffee](https://ko-fi.com/N4N61R1V56)
+- Discord: afallen
+
+- Access the tool here: [Tales Runner Fashion Assist](https://raphallen.github.io/gtrdyepicker/)
+
+- [Buy me a coffee](https://ko-fi.com/N4N61R1V56)
 
 ---
 
