@@ -103,3 +103,93 @@ input[type="text"] {
     font-size: 14px;
 }
 
+
+/* v2 Modal */
+#v2Overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#v2Modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px 28px;
+    text-align: left;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 90%;
+}
+
+#v2Modal h2 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+#v2Modal p {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+#v2Changes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#v2Changes li {
+    font-size: 0.82rem;
+    color: #555;
+    padding-left: 14px;
+    position: relative;
+}
+
+#v2Changes li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #c94e28;
+}
+
+#v2ModalButtons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+#v2ModalButtons button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+#v2Yes {
+    background: #F9B2B7;
+    color: #fff;
+}
+
+#v2No {
+    background: #eee;
+    color: #333;
+}
+
+#v2ModalButtons button:hover {
+    opacity: 0.85;
+}

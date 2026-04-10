@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tales Runner Fashion Assist — pick colors from images. Build and export palettes. Created by Afallen.">
+  <title>Tales Runner Fashion Assist</title>
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo"><img src="img/icon.png" class="logo-icon" alt=""><span>TALES RUNNER FASHION ASSIST</span></div>
+  <div class="header-credit">by Afallen (discord: afallen)</div>
+  <div class="header-actions">
+    <button class="switch-btn" onclick="window.location.href='../index.html'">← Go to v1</button>
+    <a class="coffee-link" href="https://ko-fi.com/N4N61R1V56" target="_blank">☕ Buy me a coffee</a>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- LEFT: CANVAS -->
+  <div class="canvas-area" id="canvasArea">
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-icon" onclick="document.getElementById('fileInput').click()" style="cursor:pointer;">
+        <img src="img/icon.png" style="width:100%;height:100%;object-fit:contain;object-position:bottom;">
+      </div>
+      <h2>Drop an image here</h2>
+      <p>PNG · JPG · JPEG</p>
+      <button class="browse-btn" id="browseBtn">BROWSE FILES</button>
+    </div>
+    <input type="file" id="fileInput" accept="image/png, image/jpeg">
+    <input type="file" id="paletteFileInput" accept=".json">
+
+    <div class="canvas-wrapper">
+      <canvas id="imageCanvas"></canvas>
+    </div>
+
+    <div class="toolbar" id="toolbar">
+      <button class="tool-btn active">◎ PICK</button>
+      <button class="tool-btn" id="changeImage">⇄ CHANGE IMAGE</button>
+      <button class="tool-btn" onclick="zoomOut()">−</button>
+      <span class="zoom-label" id="zoomLabel">100%</span>
+      <button class="tool-btn" onclick="zoomIn()">+</button>
+      <button class="tool-btn" onclick="zoomReset()">FIT</button>
+      <span class="toolbar-hint">SHIFT + DRAG TO PAN</span>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel">
+
+    <!-- COLOR DISPLAY -->
+    <div class="color-display">
+      <div class="color-swatch-large" id="bigSwatch"></div>
+      <div class="hsl-grid">
+        <div class="hsl-channel" onclick="copyChannel('c')">
+          <span class="hsl-label">COLOR</span>
+          <span class="hsl-value" id="valC">—</span>
+          <div class="hsl-bar"><div class="hsl-bar-fill" id="barC" style="background:linear-gradient(90deg,red,yellow,lime,cyan,blue,magenta,red)"></div></div>
+          <span class="copy-hint">COPY</span>
+        </div>
+        <div class="hsl-channel" onclick="copyChannel('i')">
+          <span class="hsl-label">INTENSITY</span>
+          <span class="hsl-value" id="valI">—</span>
+          <div class="hsl-bar"><div class="hsl-bar-fill" id="barI"></div></div>
+          <span class="copy-hint">COPY</span>
+        </div>
+        <div class="hsl-channel" onclick="copyChannel('b')">
+          <span class="hsl-label">BRIGHTNESS</span>
+          <span class="hsl-value" id="valB">—</span>
+          <div class="hsl-bar"><div class="hsl-bar-fill" id="barB" style="background:linear-gradient(90deg,#000,#888,#fff)"></div></div>
+          <span class="copy-hint">COPY</span>
+        </div>
+      </div>
+      <button class="copy-full-btn" id="copyFullBtn" onclick="copyFull()">COPY  —  /  —  /  —</button>
+    </div>
+
+    <!-- SUGGESTED COLORS -->
+    <div class="harmonies-section">
+      <span class="section-title">Suggested Colors To Match:</span>
+      <div id="harmoniesEmpty" class="harmonies-empty">Pick a color to see suggestions</div>
+      <div id="harmoniesGrid" class="harmonies-grid" style="display:none"></div>
+    </div>
+
+    <!-- PALETTE -->
+    <div class="palette-section">
+      <div class="palette-header">
+        <span class="palette-title">Palette</span>
+        <span class="palette-count" id="paletteCount">0</span>
+      </div>
+      <div class="palette-list" id="paletteList">
+        <div class="palette-empty" id="paletteEmpty">
+          <span>⬡</span>
+          <span>No colors yet.<br>Click the image to start picking.</span>
+        </div>
+      </div>
+      <div class="save-section">
+        <div class="save-label">EXPORT</div>
+        <div class="save-btns">
+          <button class="save-btn" id="json-btn" onclick="saveAsJSON()">JSON</button>
+          <button class="save-btn" id="png-btn" onclick="saveAsPNG()">PNG</button>
+        </div>
+        <div class="action-row">
+          <button class="load-btn" onclick="document.getElementById('paletteFileInput').click()">⇡ LOAD JSON</button>
+          <button class="clear-btn" onclick="clearPalette()">✕ CLEAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAGNIFIER -->
+<div class="magnifier" id="magnifier">
+  <canvas id="magCanvas" width="80" height="80"></canvas>
+  <div class="magnifier-crosshair"></div>
+</div>
+
+<!-- LOAD MODAL -->
+<div class="modal-overlay" id="loadModal">
+  <div class="modal-box">
+    <h3>Load Palette</h3>
+    <p class="modal-desc" id="loadModalDesc">Loading…</p>
+    <div class="modal-preview" id="loadPreview"></div>
+    <div class="modal-btns">
+      <button class="modal-btn" onclick="applyLoad('merge')">⊕ MERGE</button>
+      <button class="modal-btn primary" onclick="applyLoad('replace')">↺ REPLACE</button>
+    </div>
+    <button class="modal-cancel" onclick="closeLoadModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

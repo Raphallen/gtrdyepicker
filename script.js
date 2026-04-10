@@ -1,3 +1,15 @@
+// v2 modal
+if (!localStorage.getItem('v2dismissed')) {
+  document.getElementById('v2Overlay').style.display = 'flex';
+}
+document.getElementById('v2Yes').addEventListener('click', () => {
+    window.location.href = 'v2/index.html';
+});
+document.getElementById('v2No').addEventListener('click', () => {
+    localStorage.setItem('v2dismissed', '1');
+    document.getElementById('v2Overlay').style.display = 'none';
+});
+
 const magnifier = document.getElementById('magnifier');
 const magnifierCanvas = document.createElement('canvas');
 const magnifierCtx = magnifierCanvas.getContext('2d');
