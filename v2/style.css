@@ -163,7 +163,7 @@ header {
   display: inline-flex; align-items: center; justify-content: center;
 }
 .toolbar-hint {
-  font-family: var(--font-mono); font-size: 0.52rem; color: var(--border2);
+  font-family: var(--font-mono); font-size: 0.52rem; color: var(--muted);
   letter-spacing: 0.06em; display: inline-flex; align-items: center;
   padding-left: 6px; border-left: 1px solid var(--border2);
 }
